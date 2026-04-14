@@ -1,5 +1,6 @@
 namespace test;
 using System.Collections.Generic;
+using System.Linq;
 
 public class KDNode
 {
@@ -9,85 +10,70 @@ public class KDNode
 
     public KDNode(int[] point)
     {
-        // 1. Присвоїти масив point у властивість Point.
-        // -> напишіть тут код, який вирішить пункт 1
-        
+        Point = point;
     }
 }
 
 public class KDTree
 {
     public KDNode Root;
-    private int k = 2; // Кількість вимірів (наприклад, 2 для площини X, Y)
+    private int k = 2; 
 
     public KDNode Insert(KDNode node, int[] point, int depth)
     {
-        // 1. Якщо node дорівнює null, повернути новий об'єкт KDNode(point).
-        // -> напишіть тут код, який вирішить пункт 1
+        if (node == null)
+            return new KDNode(point);
 
-        // 2. Обчислити поточну вісь розбиття (axis = depth % k).
-        // -> напишіть тут код, який вирішить пункт 2
+        int axis = depth % k;
 
-        // 3. Якщо значення point[axis] менше за node.Point[axis],
-        //    викликати Insert для node.Left (збільшивши depth на 1) і зберегти результат у node.Left.
-        // -> напишіть тут код, який вирішить пункт 3
+        if (point[axis] < node.Point[axis])
+        {
+            node.Left = Insert(node.Left, point, depth + 1);
+        }
+        else
+        {
+            node.Right = Insert(node.Right, point, depth + 1);
+        }
 
-        // 4. Інакше викликати Insert для node.Right (збільшивши depth на 1) і зберегти результат у node.Right.
-        // -> напишіть тут код, який вирішить пункт 4
-
-        return node; // <- для початку ігноруйте цей return. Він тут лише для того щоб код компілювався.
-                     // У вас буде/може бути інший і цей ви можете видалити
+        return node;
     }
 
     public KDNode BuildBalancedTree(List<int[]> points, int depth)
     {
-        // 1. Якщо список points порожній, повернути null.
-        // -> напишіть тут код, який вирішить пункт 1
+        if (points == null || points.Count == 0)
+            return null;
 
-        // 2. Обчислити поточну вісь розбиття (axis = depth % k).
-        // -> напишіть тут код, який вирішить пункт 2
+        int axis = depth % k;
 
-        // 3. Відсортувати список points за поточним виміром (axis).
-        // -> напишіть тут код, який вирішить пункт 3
+        points.Sort((a, b) => a[axis].CompareTo(b[axis]));
 
-        // 4. Знайти індекс медіани (medianIndex = points.Count / 2).
-        // -> напишіть тут код, який вирішить пункт 4
+        int medianIndex = points.Count / 2;
 
-        // 5. Створити новий вузол node з точкою points[medianIndex].
-        // -> напишіть тут код, який вирішить пункт 5
+        KDNode node = new KDNode(points[medianIndex]);
 
-        // 6. Викликати BuildBalancedTree для лівої половини точок (від 0 до індексу медіани)
-        //    і зберегти результат у node.Left (збільшивши depth на 1).
-        // -> напишіть тут код, який вирішить пункт 6
+        node.Left = BuildBalancedTree(points.GetRange(0, medianIndex), depth + 1);
+        node.Right = BuildBalancedTree(points.GetRange(medianIndex + 1, points.Count - (medianIndex + 1)), depth + 1);
 
-        // 7. Викликати BuildBalancedTree для правої половини точок (від індексу медіани + 1 до кінця)
-        //    і зберегти результат у node.Right (збільшивши depth на 1).
-        // -> напишіть тут код, який вирішить пункт 7
-
-        return null; // <- для початку ігноруйте цей return. Він тут лише для того щоб код компілювався.
-                     // У вас буде/може бути інший і цей ви можете видалити
+        return node;
     }
 
     public bool Search(KDNode node, int[] point, int depth)
     {
-        // 1. Якщо node дорівнює null, повернути false.
-        // -> напишіть тут код, який вирішить пункт 1
+        if (node == null)
+            return false;
 
-        // 2. Зробити перевірку, чи координати node.Point повністю збігаються з point. 
-        //    Якщо так, повернути true.
-        // -> напишіть тут код, який вирішить пункт 2
+        if (node.Point.SequenceEqual(point))
+            return true;
 
-        // 3. Обчислити поточну вісь розбиття (axis = depth % k).
-        // -> напишіть тут код, який вирішить пункт 3
+        int axis = depth % k;
 
-        // 4. Якщо значення point[axis] менше за node.Point[axis],
-        //    повернути результат рекурсивного виклику Search для node.Left (збільшивши depth на 1).
-        // -> напишіть тут код, який вирішить пункт 4
-
-        // 5. Інакше повернути результат рекурсивного виклику Search для node.Right (збільшивши depth на 1).
-        // -> напишіть тут код, який вирішить пункт 5
-
-        return false; // <- для початку ігноруйте цей return. Він тут лише для того щоб код компілювався.
-                      // У вас буде/може бути інший і цей ви можете видалити
+        if (point[axis] < node.Point[axis])
+        {
+            return Search(node.Left, point, depth + 1);
+        }
+        else
+        {
+            return Search(node.Right, point, depth + 1);
+        }
     }
 }
